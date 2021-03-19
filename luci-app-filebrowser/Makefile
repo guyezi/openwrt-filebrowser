@@ -2,6 +2,8 @@
 #
 # This is free software, licensed under the Apache License, Version 2.0 .
 #
+# Improve by guyezi <admin@guyezi.com>
+#
 
 include $(TOPDIR)/rules.mk
 
@@ -10,7 +12,7 @@ LUCI_DEPENDS:=+filebrowser
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-filebrowser
-PKG_VERSION:=1.0
+PKG_VERSION:=3.0
 PKG_RELEASE:=1
 
 PKG_LICENSE:=GPLv3
