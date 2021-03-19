@@ -7,11 +7,11 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=filebrowser
-PKG_VERSION:=2.6.2
+PKG_VERSION:=2.13.0
 PKG_RELEASE:=1
 
 PKG_SOURCE_PROTO:=git
-PKG_SOURCE_VERSION:=be8683f
+PKG_SOURCE_VERSION:=e1f658
 PKG_SOURCE_URL:=https://github.com/filebrowser/filebrowser
 PKG_MIRROR_HASH:=dbf4ff9db137d1f596ad687edec097ae1bbf75ef04447256044e960e044e2ee5
 
@@ -41,7 +41,7 @@ define Package/filebrowser
   CATEGORY:=Utilities
   TITLE:=Web File Browser which can be used as a middleware or standalone app.
   URL:=https://github.com/filebrowser/filebrowser
-  DEPENDS:=$(GO_ARCH_DEPENDS)
+  DEPENDS:=$(GO_ARCH_DEPENDS) +node +node-npm
 endef
 
 define Package/filebrowser/description
@@ -50,6 +50,15 @@ define Package/filebrowser/description
   It allows the creation of multiple users and each user can have its own directory.
   It can be used as a standalone app or as a middleware.
 endef
+
+TAR_OPTIONS+= --strip-components 1
+TAR_CMD=$(HOST_TAR) -C $(1) $(TAR_OPTIONS)
+
+NODEJS_CPU:=$(subst powerpc,ppc,$(subst aarch64,arm64,$(subst x86_64,x64,$(subst i386,ia32,$(ARCH)))))
+TMPNPM:=$(shell mktemp -u XXXXXXXXXX)
+
+TARGET_CFLAGS+=$(FPIC)
+TARGET_CPPFLAGS+=$(FPIC)
 
 define Package/filebrowser/config
 config FILEBROWSER_COMPRESS_GOPROXY
@@ -69,9 +78,12 @@ endif
 define Build/Compile
 ( \
   cd $(PKG_BUILD_DIR) ; \
-  rm -rf frontend/dist ; \
+  #rm -rf frontend/dist ; \
   rm -f http/rice-box.go ; \
   cd $(PKG_BUILD_DIR)/frontend ; \
+  npm_config_arch=$(NODEJS_CPU) \
+  npm_config_target_arch=$(NODEJS_CPU) \
+  npm_config_build_from_source=true \
   npm ci; \
   npm run lint ; \
   npm run build ; \
